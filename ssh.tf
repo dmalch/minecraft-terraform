@@ -1,0 +1,5 @@
+resource "aws_key_pair" "ec2_ssh" {
+  count      = 1
+  key_name   = "minecraft-ec2-ssh-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDPzs4ME6HCEbTaztfez0q+kvIiZJh4LI9CwZ3gI+s+NbEGGk3g6+G/rXzA8ox0E7JNsAfsfCopsNYlhRW28SynLRzD4SENyGoqWK7rYvsyq4VxSkcVehregZo6Qxaatk8GkuzyI+h3UgnWe+BXvC96fqEhJriJ7z7MoDiEifpB91cBvoLklDYOVF0CIn4HaEJNXF6Ej11FGoAYbuDveLlllilbGDORFZZcC5Htg1AhhPYA61kK5bVRWbDTkOJ6HnYmnYw/5OXTl8g9DkmYC6rv366eBfmy3ra4IpFtpAFQyfoUZS+z9YrxuTvk7sMIBOvdqH8AQhNu/jB8dpMsqNs/Fe6q7FaHqsid5OW3jZouFMB0PvHt15Tgn7dXGxhXfNSpS7DR3Urtb/JXCY+zR9RIQWAy81qs3MeulcgarPV2CP06AR/H34qsDgouzC6KATfKZdRN7NVoenBT2xXncwdhBN0d8p51x+wqcGV+xTvnEoUeKhz8e9K000mVtOylkEc= dmalch@gmail.com"
+}
