@@ -8,7 +8,7 @@ module "ec2-instance" {
 
   associate_public_ip_address = true
 
-  instance_type = "t2.micro"
+  instance_type = "t2.medium"
 
   vpc_security_group_ids = [module.security-group.security_group_id]
 
@@ -17,4 +17,8 @@ module "ec2-instance" {
   iam_instance_profile = aws_iam_instance_profile.minecraft.id
 
   subnet_id = sort(module.vpc.public_subnets)[0]
+
+  user_data = templatefile("${path.module}/run_minecraft.sh", {
+    minecraft_version = "latest"
+  })
 }
