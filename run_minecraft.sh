@@ -6,8 +6,11 @@ set -e
 ubuntu_linux_setup() {
   export SSH_USER="ubuntu"
   export DEBIAN_FRONTEND=noninteractive
+  # install adopt open jdk 16   
+  wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
+  /usr/bin/add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
   /usr/bin/apt-get update
-  /usr/bin/apt-get -yq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" default-jre wget awscli jq
+  /usr/bin/apt-get -yq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" adoptopenjdk-16-hotspot-jre wget awscli jq
   /bin/cat <<"__UPG__" > /etc/apt/apt.conf.d/10periodic
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Download-Upgradeable-Packages "1";
@@ -21,7 +24,7 @@ __UPG__
 # Short-Description: Minecraft server
 start() {
   echo "Starting minecraft server from /home/minecraft..."
-  start-stop-daemon --start --quiet  --pidfile /home/minecraft/minecraft.pid -m -b -c $SSH_USER -d /home/minecraft --exec /usr/bin/java -- -Xmx2G -Xms2G -jar $MINECRAFT_JAR nogui
+  start-stop-daemon --start --quiet --pidfile /home/minecraft/minecraft.pid -m -b -c $SSH_USER -d /home/minecraft --exec /usr/bin/java -- -Xmx2G -Xms2G -jar /home/minecraft/minecraft_server.jar nogui
 }
 stop() {
   echo "Stopping minecraft server..."
@@ -74,7 +77,7 @@ download_minecraft_server() {
 # Create mc dir, sync S3 to it and download mc if not already there (from S3)
 ubuntu_linux_setup
 /bin/mkdir -p /home/minecraft
-# /usr/bin/aws s3 sync s3://minecraft-bucket /home/minecraft
+/usr/bin/aws s3 sync s3://${minecraft_bucket} /home/minecraft
 
 # Download server if it doesn't exist on S3 already (existing from previous install)
 # To force a new server version, remove the server JAR from S3 bucket
@@ -83,11 +86,11 @@ if [[ ! -e "/home/minecraft/minecraft_server.jar" ]]; then
 fi
 
 # Cron job to sync data to S3 every five mins
-# /bin/cat <<CRON > /etc/cron.d/minecraft
-# SHELL=/bin/bash
-# PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/home/minecraft
-# */5 * * * *  $SSH_USER  /usr/bin/aws s3 sync /home/minecraft s3://minecraft-bucket
-# CRON
+/bin/cat <<CRON > /etc/cron.d/minecraft
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/home/minecraft
+*/5 * * * *  $SSH_USER  /usr/bin/aws s3 sync /home/minecraft s3://${minecraft_bucket}
+CRON
 
 # Update minecraft EULA
 /bin/cat >/home/minecraft/eula.txt<<EULA

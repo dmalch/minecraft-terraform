@@ -20,5 +20,6 @@ module "ec2-instance" {
 
   user_data = templatefile("${path.module}/run_minecraft.sh", {
     minecraft_version = "latest"
+    minecraft_bucket  = local.bucket
   })
 }
