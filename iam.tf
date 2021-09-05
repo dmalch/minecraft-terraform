@@ -42,6 +42,20 @@ resource "aws_iam_role_policy" "minecraft_allow_ec2_to_s3" {
         "s3:DeleteObject"
       ],
       "Resource": ["arn:aws:s3:::${local.bucket}/*"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::${local.bucket2}"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": ["arn:aws:s3:::${local.bucket2}/*"]
     }
   ]
 }
