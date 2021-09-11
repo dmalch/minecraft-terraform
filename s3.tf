@@ -1,23 +1,31 @@
-module "s3" {
-  source = "terraform-aws-modules/s3-bucket/aws"
-
+resource "aws_s3_bucket" "minecraft-data" {
   bucket = local.bucket
   acl    = "private"
 
-  # S3 bucket-level Public Access Block configuration
+  versioning {
+    enabled = true
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "dmalch-minecraft-data-access" {
+  bucket                  = local.bucket
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
-module "s3-2" {
-  source = "terraform-aws-modules/s3-bucket/aws"
-
+resource "aws_s3_bucket" "minecraft-data-2" {
   bucket = local.bucket2
   acl    = "private"
 
-  # S3 bucket-level Public Access Block configuration
+  versioning {
+    enabled = true
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "dmalch-minecraft-data-access-2" {
+  bucket                  = local.bucket2
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
