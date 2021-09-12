@@ -3,7 +3,7 @@ resource "aws_instance" "minecraft-ec2" {
   iam_instance_profile        = aws_iam_instance_profile.minecraft.id
   instance_type               = "t2.medium"
   subnet_id                   = aws_subnet.minecraft_public.id
-  vpc_security_group_ids      = [module.security-group.security_group_id]
+  vpc_security_group_ids      = [aws_security_group.minecraft_ec2_ssh_and_minecraft.id]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.ec2_ssh[0].key_name
 
