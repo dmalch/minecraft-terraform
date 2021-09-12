@@ -4,7 +4,7 @@ module "security-group" {
 
   name        = "minecraft-ec2-ssh-and-minecraft"
   description = "Allow SSH and TCP ${local.mc_port}"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = aws_vpc.minecraft-vpc.id
 
   ingress_cidr_blocks = ["0.0.0.0/0"]
   ingress_with_cidr_blocks = [
