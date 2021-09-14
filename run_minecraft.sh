@@ -62,9 +62,7 @@ download_minecraft_server() {
   $WGET -O /home/minecraft/version_manifest.json https://launchermeta.mojang.com/mc/game/version_manifest.json
 
   # Find latest version number if user wants that version (the default)
-  if [[ "${minecraft_version}" == "latest" ]]; then
-    MC_VERS=$(jq -r '.["latest"]["'"release"'"]' /home/minecraft/version_manifest.json)
-  fi
+  MC_VERS=$(jq -r '.["latest"]["'"release"'"]' /home/minecraft/version_manifest.json)
 
   # Index version_manifest.json by the version number and extract URL for the specific version manifest
   VERSIONS_URL=$(jq -r '.["versions"][] | select(.id == "'"$MC_VERS"'") | .url' /home/minecraft/version_manifest.json)
