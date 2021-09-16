@@ -33,5 +33,5 @@ system_info:
 
 runcmd:
   - /usr/bin/sleep 10
-  - /usr/bin/docker pull tutum/hello-world
-  - /usr/bin/docker run -d -p 80:80 --restart=always -e SOME_VAR="SOME VALUE" tutum/hello-world
+  - /usr/bin/docker pull 550157292651.dkr.ecr.eu-central-1.amazonaws.com/minecraft-server:latest
+  - /usr/bin/docker run -d -p 25565:25565 --restart=always -e S3_BUCKET="${minecraft_bucket}" 550157292651.dkr.ecr.eu-central-1.amazonaws.com/minecraft-server:latest
