@@ -42,6 +42,20 @@ resource "aws_iam_role_policy" "docker-allow-ec2-to-s3-and-ecr" {
       },
       {
         "Effect" : "Allow",
+        "Action" : ["s3:ListBucket"],
+        "Resource" : ["arn:aws:s3:::${local.bucket2}"]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ],
+        "Resource" : ["arn:aws:s3:::${local.bucket2}/*"]
+      },
+      {
+        "Effect" : "Allow",
         "Action" : [
           "ecr:BatchCheckLayerAvailability",
           "ecr:BatchGetImage",
