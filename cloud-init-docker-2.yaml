@@ -58,10 +58,14 @@ system_info:
 runcmd:
   - mkdir /opt/minecraft
   - aws s3 sync --exclude "*" --include "world/*" --include "logs/*" s3://${minecraft_bucket} /opt/minecraft
+  - chmod +xwr --recursive world/
+  - chmod +xwr --recursive logs/
   - docker run
     -d
+    -e EULA=TRUE
+    -e JVM_XX_OPTS="-XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
     -p 25565:25565
     --restart=always
-    -v /opt/minecraft/world:/opt/minecraft/world
-    -v /opt/minecraft/logs:/opt/minecraft/logs
-    550157292651.dkr.ecr.eu-central-1.amazonaws.com/minecraft-server:latest
+    -v /opt/minecraft/world:/data/world
+    -v /opt/minecraft/logs:/data/logs
+    itzg/minecraft-server

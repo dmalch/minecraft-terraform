@@ -99,7 +99,7 @@ resource "aws_iam_group_policy" "AllowPush" {
           "ecr:BatchCheckLayerAvailability",
           "ecr:PutImage"
         ],
-        "Resource" : "${aws_ecr_repository.minecraft-server.arn}"
+        "Resource" : "arn:aws:ecr:eu-central-1:550157292651:repository/*"
       }
     ]
   })
