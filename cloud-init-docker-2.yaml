@@ -46,7 +46,7 @@ write_files:
     content: |
       */5 * * * * ubuntu aws s3 sync --exclude "*" --include "world/*" --include "logs/*" /opt/minecraft s3://${minecraft_bucket}
   - path: /opt/aws/amazon-cloudwatch-agent/bin/config.json
-  - content: |
+    content: |
       {
           "agent": {
               "run_as_user": "cwagent"
