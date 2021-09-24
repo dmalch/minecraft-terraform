@@ -6,6 +6,10 @@ apt:
       source: deb [arch=amd64] https://download.docker.com/linux/ubuntu $RELEASE stable
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 
+package_update: true
+
+package_upgrade: true
+
 packages:
   - apt-transport-https
   - ca-certificates
@@ -16,6 +20,7 @@ packages:
   - docker-ce-cli
   - containerd.io
   - amazon-ecr-credential-helper
+  - awscli
 
 # Enable ipv4 forwarding, required on CIS hardened machines
 write_files:
@@ -37,6 +42,60 @@ write_files:
     content: |
       ClientAliveInterval 600
       ClientAliveCountMax 0
+  - path: /etc/cron.d/minecraft
+    content: |
+      */5 * * * * ubuntu aws s3 sync --exclude "*" --include "world/*" --include "logs/*" /opt/minecraft s3://${minecraft_bucket}
+  - path: /opt/aws/amazon-cloudwatch-agent/bin/config.json
+    content: |
+      {
+          "agent": {
+              "metrics_collection_interval": 60,
+              "run_as_user": "cwagent"
+          },
+          "logs": {
+              "logs_collected": {
+                  "files": {
+                      "collect_list": [
+                          {
+                              "file_path": "/var/log/cloud-init-output.log",
+                              "log_group_name": "cloud-init",
+                              "log_stream_name": "{instance_id}"
+                          },
+                          {
+                              "file_path": "/opt/minecraft/logs/latest.log",
+                              "log_group_name": "minecraft",
+                              "log_stream_name": "{instance_id}"
+                          }
+                      ]
+                  }
+              }
+          },
+          "metrics": {
+              "append_dimensions": {
+                  "AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+                  "ImageId": "${aws:ImageId}",
+                  "InstanceId": "${aws:InstanceId}",
+                  "InstanceType": "${aws:InstanceType}"
+              },
+              "metrics_collected": {
+                  "disk": {
+                      "measurement": [
+                          "used_percent"
+                      ],
+                      "metrics_collection_interval": 60,
+                      "resources": [
+                          "*"
+                      ]
+                  },
+                  "mem": {
+                      "measurement": [
+                          "mem_used_percent"
+                      ],
+                      "metrics_collection_interval": 60
+                  }
+              }
+          }
+      }
 
 # create the docker group
 groups:
@@ -48,6 +107,19 @@ system_info:
     groups: [docker]
 
 runcmd:
-  - /usr/bin/sleep 10
-  - /usr/bin/docker pull 550157292651.dkr.ecr.eu-central-1.amazonaws.com/minecraft-server:latest
-  - /usr/bin/docker run -d -p 25565:25565 --restart=always -e S3_BUCKET="${minecraft_bucket}" 550157292651.dkr.ecr.eu-central-1.amazonaws.com/minecraft-server:latest
+  - curl -o amazon-cloudwatch-agent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+  - dpkg -i -E amazon-cloudwatch-agent.deb
+  - rm amazon-cloudwatch-agent.deb
+  - mkdir /opt/minecraft
+  - aws s3 sync --exclude "*" --include "world/*" --include "logs/*" s3://${minecraft_bucket} /opt/minecraft
+  - chmod 777 --recursive /opt/minecraft/world/
+  - chmod 777 --recursive /opt/minecraft/logs/
+  - chmod 644 /var/log/cloud-init-output.log
+  - /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
+  - docker run
+    -d
+    -p 25565:25565
+    --restart=always
+    -v /opt/minecraft/world:/data/world
+    -v /opt/minecraft/logs:/data/logs
+    550157292651.dkr.ecr.eu-central-1.amazonaws.com/itzg-minecraft-server
