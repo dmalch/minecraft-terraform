@@ -89,6 +89,16 @@ resource "aws_iam_role_policy" "docker_allow_ec2_to_s3_ecr_and_cloudwatch" {
   })
 }
 
+resource "aws_iam_group_membership" "github_membership" {
+  name = "github_membership"
+
+  users = [
+    aws_iam_user.github.name,
+  ]
+
+  group = aws_iam_group.Github.name
+}
+
 resource "aws_iam_group" "Github" {
   name = "Github"
   path = "/"
